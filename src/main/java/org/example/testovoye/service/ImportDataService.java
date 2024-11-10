@@ -36,39 +36,43 @@ public class ImportDataService {
 
     @Scheduled(cron = "0 15 */2 * * *")
     public void importNotes(){
-        var patients = patientProfileRepository.findTop2ByStatusIdInAndIsImported(Arrays.asList(200, 210, 230), false);
-        if(!patients.isEmpty()){
-            var patientsFormOldSystem = oldSystemApi.getClients();
-            Map<String, String> patientsAgencyMap = utils.mapPatientsAgencyToHashMap(patients, patientsFormOldSystem);
-            for(PatientProfileEntity p : patients){
-                var request = new GetNotesRequestBody(
-                        patientsAgencyMap.get(p.getOldClientGuid()),
-                        LocalDate.of(2019, 9, 18),
-                        LocalDate.of(2025, 9, 17),
-                        p.getOldClientGuid()
-                );
-                var notesFromOldSystem = oldSystemApi.getNotes(
-                        request
-                );
-                for(GetNotesResponse n : notesFromOldSystem){
-                   var createdByUser = companyUserRepository.findByLogin(n.loggedUser());
-                   if(createdByUser == null){
-                       createdByUser = new CompanyUserEntity(n.loggedUser());
-                       companyUserRepository.save(createdByUser);
-                   }
-                   patientNoteRepository.save(new PatientNoteEntity(
-                           LocalDateTime.parse(n.createdDateTime(), formater),
-                           LocalDateTime.parse(n.modifiedDateTime(), formater),
-                           createdByUser,
-                           createdByUser,
-                           n.comments(),
-                           p
-                   ));
-                   p.setImported(true);
-                   patientProfileRepository.save(p);
-                   log.info("notes imported for patient with guid : {}",  p.oldClientGuid);
-               }
+        try {
+            var patients = patientProfileRepository.findTop2ByStatusIdInAndIsImported(Arrays.asList(200, 210, 230), false);
+            if(!patients.isEmpty()){
+                var patientsFormOldSystem = oldSystemApi.getClients();
+                Map<String, String> patientsAgencyMap = utils.mapPatientsAgencyToHashMap(patients, patientsFormOldSystem);
+                for(PatientProfileEntity p : patients){
+                    var request = new GetNotesRequestBody(
+                            patientsAgencyMap.get(p.getOldClientGuid()),
+                            LocalDate.of(2019, 9, 18),
+                            LocalDate.of(2025, 9, 17),
+                            p.getOldClientGuid()
+                    );
+                    var notesFromOldSystem = oldSystemApi.getNotes(
+                            request
+                    );
+                    for(GetNotesResponse n : notesFromOldSystem){
+                        var createdByUser = companyUserRepository.findByLogin(n.loggedUser());
+                        if(createdByUser == null){
+                            createdByUser = new CompanyUserEntity(n.loggedUser());
+                            companyUserRepository.save(createdByUser);
+                        }
+                        patientNoteRepository.save(new PatientNoteEntity(
+                                LocalDateTime.parse(n.createdDateTime(), formater),
+                                LocalDateTime.parse(n.modifiedDateTime(), formater),
+                                createdByUser,
+                                createdByUser,
+                                n.comments(),
+                                p
+                        ));
+                        p.setImported(true);
+                        patientProfileRepository.save(p);
+                        log.info("notes imported for patient with guid : {}",  p.oldClientGuid);
+                    }
+                }
             }
+        }catch (RuntimeException e){
+            log.info("import failed with exception: {}", e.getMessage());
         }
     }
 }
