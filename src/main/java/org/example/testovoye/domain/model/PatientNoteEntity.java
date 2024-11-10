@@ -22,23 +22,28 @@ public class PatientNoteEntity {
     @Column(name = "last_modified_date_time")
     public LocalDateTime lastModifiedDateTime;
 
-    @Column(name = "created_by_user_id")
+    @JoinColumn(name = "created_by_user_id")
     @ManyToOne
     public CompanyUserEntity createdByUserId;
 
-    @Column(name = "last_modified_by_user_id")
+    @JoinColumn(name = "last_modified_by_user_id")
     @ManyToOne
     public CompanyUserEntity lastModifiedByUserId;
 
     @Column(name = "note")
     public String note;
 
-    public PatientNoteEntity(LocalDateTime createdDateTime, LocalDateTime lastModifiedDateTime, CompanyUserEntity createdByUserId, CompanyUserEntity lastModifiedByUserId, String note) {
+    @JoinColumn(name = "patient_id")
+    @ManyToOne
+    public PatientProfileEntity patientId;
+
+    public PatientNoteEntity(LocalDateTime createdDateTime, LocalDateTime lastModifiedDateTime, CompanyUserEntity createdByUserId, CompanyUserEntity lastModifiedByUserId, String note, PatientProfileEntity patientId) {
         this.createdDateTime = createdDateTime;
         this.lastModifiedDateTime = lastModifiedDateTime;
         this.createdByUserId = createdByUserId;
         this.lastModifiedByUserId = lastModifiedByUserId;
         this.note = note;
+        this.patientId = patientId;
     }
 
     public PatientNoteEntity() {

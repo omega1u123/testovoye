@@ -23,6 +23,9 @@ public class PatientProfileEntity {
     @Column(name = "old_client_guid")
     public String oldClientGuid;
 
+    @Column(name = "is_imported")
+    public boolean isImported;
+
     @Column(name = "status_id")
     public int statusId;
 }

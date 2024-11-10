@@ -5,10 +5,10 @@ import java.time.LocalDateTime;
 public record GetNotesResponse(
         String comments,
         String guid,
-        LocalDateTime modifiedDateTime,
+        String modifiedDateTime,
         String clientGuid,
         LocalDateTime dateTime,
         String loggedUser,
-        LocalDateTime createdDateTime
+        String createdDateTime
 ) {
 }

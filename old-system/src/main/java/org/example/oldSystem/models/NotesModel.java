@@ -1,6 +1,5 @@
 package org.example.oldSystem.models;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public class NotesModel {
